@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, to_date, hour, count, avg, sum
+from pyspark.sql.functions import col, to_date, hour, count, avg, sum, year
 
 spark = SparkSession.builder \
     .appName("NYCTaxiDataCleaning") \
@@ -7,10 +7,12 @@ spark = SparkSession.builder \
 
 df = spark.read.parquet("/opt/spark/data/raw/yellow_tripdata_2024-01.parquet")
 
+# Filter out invalid records and outlier dates (keep only 2024)
 df_filtered = df.filter(
     (col("passenger_count") > 0) & 
     (col("trip_distance") > 0.0) & 
-    (col("total_amount") > 0.0)
+    (col("total_amount") > 0.0) &
+    (year(col("tpep_pickup_datetime")) == 2024)
 )
 
 df_daily_summary = df_filtered.withColumn("pickup_date", to_date(col("tpep_pickup_datetime"))) \
