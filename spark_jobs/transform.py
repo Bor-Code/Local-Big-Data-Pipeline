@@ -28,8 +28,28 @@ df_hourly_revenue = df_filtered.withColumn("pickup_hour", hour(col("tpep_pickup_
     ) \
     .orderBy("pickup_hour")
 
-df_filtered.show(5)
-df_daily_summary.show(5)
-df_hourly_revenue.show(5)
+df_daily_summary.write \
+    .format("jdbc") \
+    .option("url", "jdbc:postgresql://postgres:5432/bigdata_db") \
+    .option("dbtable", "daily_summary") \
+    .option("user", "postgres") \
+    .option("password", "mysecretpassword") \
+    .option("driver", "org.postgresql.Driver") \
+    .option("truncate", "true") \
+    .mode("overwrite") \
+    .save()
+
+df_hourly_revenue.write \
+    .format("jdbc") \
+    .option("url", "jdbc:postgresql://postgres:5432/bigdata_db") \
+    .option("dbtable", "hourly_revenue") \
+    .option("user", "postgres") \
+    .option("password", "mysecretpassword") \
+    .option("driver", "org.postgresql.Driver") \
+    .option("truncate", "true") \
+    .mode("overwrite") \
+    .save()
+
+print("Data successfully written to PostgreSQL.")
 
 spark.stop()
